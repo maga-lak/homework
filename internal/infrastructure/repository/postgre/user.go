@@ -18,6 +18,10 @@ func NewUserRepository(db *pg.DB) *UserRepository {
 	}
 }
 
+func (r *UserRepository) CreateUser(ctx context.Context, user *entity.User) error {
+	return nil
+}
+
 func (r *UserRepository) GetUser(ctx context.Context, username, password string) (*entity.User, error) {
 	var user *entity.User
 	//хэш пароля

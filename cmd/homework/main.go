@@ -7,7 +7,7 @@ import (
 
 func main() {
 	//разобратся как прокидывать конфиги из ямл
-	// как вариант viper
+	// @todo viper
 	// енвы и все такое
 	// тут же секреты  итд
 	cfg := configs.MainConfig{

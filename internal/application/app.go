@@ -1,10 +1,10 @@
 package application
 
 import (
-	"go.uber.org/zap"
+	"homework/internal/service"
 
 	"homework/internal/configs"
-	"homework/internal/datasource/postgre"
+	"homework/internal/infrastructure/repository/postgre"
 )
 
 type Application struct {
@@ -26,18 +26,15 @@ func (a *Application) Shutdown() {
 }
 
 func (a *Application) Run() {
-	logger, err := zap.NewProduction()
-	if err != nil {
-		panic(err)
-	}
-	sugar := logger.Sugar()
-
 	conn, err := postgre.GetConnection(a.cfg.Database.Dsn, "ps-report-go")
 	if err != nil {
 		panic(err)
 	}
 
 	userRepo := postgre.NewUserRepository(conn)
+
+	authService := service.NewAuthService(userRepo)
+
 	//
 	//cnt := &container.AppContainer{
 	//	ReportSrv: reportSrv,
