@@ -7,5 +7,5 @@ import (
 
 type UserRepository interface {
 	CreateUser(ctx context.Context, user *entity.User) error
-	GetUser(ctx context.Context, username, password string) (*entity.User, error)
+	GetUserByUserName(ctx context.Context, username string) (*entity.User, error)
 }

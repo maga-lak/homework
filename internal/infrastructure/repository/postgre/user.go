@@ -22,11 +22,11 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *entity.User) erro
 	return nil
 }
 
-func (r *UserRepository) GetUser(ctx context.Context, username, password string) (*entity.User, error) {
+func (r *UserRepository) GetUserByUserName(ctx context.Context, username string) (*entity.User, error) {
+	//todo  не забыть username UNIQUE
 	var user *entity.User
-	//хэш пароля
 	err := r.DB.Model(&user).
-		Where("username = ? and password= ?", username, password).
+		Where("username = ?", username).
 		Context(ctx).
 		First()
 	if err != nil {

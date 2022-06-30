@@ -11,14 +11,15 @@ func main() {
 	// енвы и все такое
 	// тут же секреты  итд
 	cfg := configs.MainConfig{
-		configs.DBConfig{
-			Dialect:      "postgres",
-			Dsn:          "postgresql://ps_report_dev:DbrjoE95x6SrvIxQ@10.48.3.204:5432/ps_report_dev?sslmode=disable",
-			DisableLog:   false,
-			MaxIdleConn:  10,
-			MaxOpenConn:  10,
-			ConnLifetime: "1h",
+		Database: configs.DBConfig{
+			Dsn: "postgresql://db:testPassQ@192.168.0.1:5432/db?sslmode=disable",
 		},
+		Auth: configs.AuthConfig{
+			SignKey:        []byte("some_key"),
+			Alg:            "RS256",
+			ExpireDuration: 600,
+		},
+		Port: 8081,
 	}
 	app := application.NewApp(&cfg)
 

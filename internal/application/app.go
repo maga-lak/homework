@@ -1,19 +1,24 @@
 package application
 
 import (
-	"homework/internal/service"
-
+	"fmt"
+	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 	"homework/internal/configs"
+	v1 "homework/internal/controller/http/v1"
 	"homework/internal/infrastructure/repository/postgre"
+	"homework/internal/service"
+	"net/http"
 )
 
 type Application struct {
-	cfg *configs.MainConfig
+	cfg        *configs.MainConfig
+	httpServer *http.Server
 }
 
 func NewApp(cfg *configs.MainConfig) *Application {
 	return &Application{
-		cfg,
+		cfg: cfg,
 	}
 }
 
@@ -26,22 +31,45 @@ func (a *Application) Shutdown() {
 }
 
 func (a *Application) Run() {
+	sugar := initLogger()
+	sugar.Info("start app")
+
 	conn, err := postgre.GetConnection(a.cfg.Database.Dsn, "ps-report-go")
 	if err != nil {
+		sugar.Fatalf("db connection error: %s", err.Error())
 		panic(err)
 	}
+	sugar.Info("init db")
 
 	userRepo := postgre.NewUserRepository(conn)
 
-	authService := service.NewAuthService(userRepo)
+	authService := service.NewAuthService(userRepo, a.cfg.Auth)
 
-	//
-	//cnt := &container.AppContainer{
-	//	ReportSrv: reportSrv,
-	//}
-	//srv := server.NewServers(sugar, cnt, a.cfg.Report.Port)
-	//err = srv.Run()
-	//if err != nil {
-	//	panic(err)
-	//}
+	a.initServer(sugar, authService)
+}
+
+func (a *Application) initServer(sugar *zap.SugaredLogger, authService *service.AuthService) {
+	handler := v1.NewServer(authService, sugar)
+
+	router := chi.NewMux()
+	router.Post("/api/v1/auth", handler.Auth)
+
+	a.httpServer = &http.Server{
+		Addr:    fmt.Sprintf(":%d", a.cfg.Port),
+		Handler: router,
+	}
+
+	err := a.httpServer.ListenAndServe()
+	if err != nil {
+		sugar.Fatalf("failed to start http server: %s", err.Error())
+		panic(err)
+	}
+}
+
+func initLogger() *zap.SugaredLogger {
+	logger, err := zap.NewProduction()
+	if err != nil {
+		panic(err)
+	}
+	return logger.Sugar()
 }

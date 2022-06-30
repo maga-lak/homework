@@ -12,6 +12,5 @@ type User struct {
 // todo где расположить
 type UserClaims struct {
 	*jwt.RegisteredClaims
-	TokenType string
-	User      User `json:"user"`
+	User User `json:"user"`
 }
