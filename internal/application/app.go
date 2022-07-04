@@ -59,11 +59,12 @@ func (a *Application) initServer(sugar *zap.SugaredLogger, authService *service.
 		Handler: router,
 	}
 
-	err := a.httpServer.ListenAndServe()
-	if err != nil {
-		sugar.Fatalf("failed to start http server: %s", err.Error())
-		panic(err)
-	}
+	go func() {
+		if err := a.httpServer.ListenAndServe(); err != nil {
+			sugar.Fatalf("Failed to start http server:  %s", err.Error())
+			panic(err)
+		}
+	}()
 }
 
 func initLogger() *zap.SugaredLogger {
